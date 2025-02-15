@@ -1,0 +1,71 @@
+# GENERAL
+**/build/*
+**/*.log
+
+# EDITOR
+.vscode
+.VSCodeCounter
+.idea
+.nvim
+.vimspector.json
+**/clangd
+**/compile_commands.json
+
+# PYTHON
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/*.pyd
+**/.pytest_cache
+.hypothesis
+**/try.py
+**/celerybeat-schedule
+dist/
+wheels/
+**/*.ju.py
+**/.ipynb_checkpoints/
+**/.mypy_cache
+venv/
+.venv/
+**/*.whl
+
+# AI
+lightning_logs/
+runs/
+.aider*
+**/*.onnx
+**/*.pt
+**/*.pkl
+**/*.npy
+
+# NODE JS TS
+**/node_modules
+
+# Editor temporaries
+*.swn
+*.swo
+*.swp
+*~
+
+# CPP
+.cache
+**/.ccls-cache
+doxygen
+compile-commands.json
+CMakeCache.txt
+CMakeFiles
+**/*.so
+**/*.dll
+
+# SOLIDITY
+**/cache
+**/artifacts
+**/*coverage*
+**/@openzeppelin/*
+**/gasReporterOutput.json
+
+# DB
+**/*.db
+
+# SUBMODULES
+out
