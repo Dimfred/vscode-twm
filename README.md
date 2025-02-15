@@ -1,4 +1,4 @@
-# VSCode TWM
+# [VSCode TWM](https://marketplace.visualstudio.com/items?itemName=dimfred.vscode-twm)
 
 A simple tiling layout for vscode.
 
