@@ -2,7 +2,7 @@
     "name": "vscode-twm",
     "displayName": "TWM",
     "description": "A VSCode tiling window manager (just one layout lel)",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "publisher": "dimfred",
     "engines": {
         "vscode": "^1.97.0"
