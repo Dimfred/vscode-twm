@@ -26,7 +26,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     let active = true;
 
-    let init = () => {
+    let init = async () => {
         const centerWidth = vscode.workspace.getConfiguration('twm').get<number>('centerWidth', 0.7);
         resizeEditorGroups(centerWidth);
 
@@ -34,7 +34,22 @@ export function activate(context: vscode.ExtensionContext) {
         layout.left = editors.find(e => e.viewColumn === 1)?.document || null;
         layout.center = editors.find(e => e.viewColumn === 2)?.document || null;
         layout.right = editors.find(e => e.viewColumn === 3)?.document || null;
-        vscode.window.showTextDocument(layout.center, { viewColumn: 2 });
+
+        const nonNullEditor = layout.left || layout.center || layout.right;
+        if (!layout.left) {
+            await vscode.window.showTextDocument(nonNullEditor, { viewColumn: 1 });
+            layout.left = nonNullEditor;
+        }
+        if (!layout.center) {
+            await vscode.window.showTextDocument(nonNullEditor, { viewColumn: 2 });
+            layout.center = nonNullEditor;
+        }
+        if (!layout.right) {
+            await vscode.window.showTextDocument(nonNullEditor, { viewColumn: 3 });
+            layout.right = nonNullEditor;
+        }
+
+        await vscode.window.showTextDocument(layout.center, { viewColumn: 2 });
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -109,7 +124,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
         isSwapping = false;
 
-        init();
+        await init();
     });
 }
 
