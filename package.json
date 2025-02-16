@@ -25,7 +25,18 @@
                 "command": "twm.stop",
                 "title": "TWM: stop"
             }
-        ]
+        ],
+        "configuration": {
+            "type": "object",
+            "title": "TWM Configuration",
+            "properties": {
+                "twm.centerWidth": {
+                    "type": "number",
+                    "default": "0.55",
+                    "description": "The width of the center window"
+                }
+            }
+        }
     },
     "scripts": {
         "vscode:prepublish": "npm run compile",
