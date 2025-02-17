@@ -136,7 +136,10 @@ export function activate(context: vscode.ExtensionContext) {
         )?.document;
 
         // only if it's really a new file
-        if (centerEditor?.uri.toString() === layout.center?.uri.toString()) {
+        if (
+          !JSON.stringify(layout.center, null, 2) ||
+          centerEditor?.uri?.toString() === layout.center.toString()
+        ) {
           isSwapping = false;
           return;
         }

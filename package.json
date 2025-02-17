@@ -1,55 +1,55 @@
 {
-  "name": "vscode-twm",
-  "displayName": "TWM",
-  "description": "A VSCode tiling window manager (just one layout lel)",
-  "version": "0.0.8",
-  "publisher": "dimfred",
-  "engines": {
-    "vscode": "^1.97.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/dimfred/vscode-twm"
-  },
-  "activationEvents": [
-    "onCommand:twm.start"
-  ],
-  "main": "./dist/extension.js",
-  "contributes": {
-    "commands": [
-      {
-        "command": "twm.start",
-        "title": "TWM: start"
-      },
-      {
-        "command": "twm.stop",
-        "title": "TWM: stop"
-      }
+    "name": "vscode-twm",
+    "displayName": "TWM",
+    "description": "A VSCode tiling window manager (just one layout lel)",
+    "version": "0.0.10",
+    "publisher": "dimfred",
+    "engines": {
+        "vscode": "^1.97.0"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/dimfred/vscode-twm"
+    },
+    "activationEvents": [
+        "onCommand:twm.start"
     ],
-    "configuration": {
-      "type": "object",
-      "title": "TWM Configuration",
-      "properties": {
-        "twm.centerWidth": {
-          "type": "number",
-          "default": "0.55",
-          "description": "The width of the center window"
+    "main": "./dist/extension.js",
+    "contributes": {
+        "commands": [
+            {
+                "command": "twm.start",
+                "title": "TWM: start"
+            },
+            {
+                "command": "twm.stop",
+                "title": "TWM: stop"
+            }
+        ],
+        "configuration": {
+            "type": "object",
+            "title": "TWM Configuration",
+            "properties": {
+                "twm.centerWidth": {
+                    "type": "number",
+                    "default": "0.55",
+                    "description": "The width of the center window"
+                }
+            }
         }
-      }
+    },
+    "scripts": {
+        "vscode:prepublish": "npm run compile",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "postinstall": "node ./node_modules/vscode/bin/install"
+    },
+    "devDependencies": {
+        "@types/node": "^14.14.6",
+        "@types/vscode": "^1.97.0",
+        "esbuild": "^0.25.0",
+        "typescript": "^4.0.3",
+        "vsce": "^2.15.0",
+        "vscode": "^1.1.36"
     }
-  },
-  "scripts": {
-    "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
-    "postinstall": "node ./node_modules/vscode/bin/install"
-  },
-  "devDependencies": {
-    "@types/node": "^14.14.6",
-    "@types/vscode": "^1.97.0",
-    "esbuild": "^0.25.0",
-    "typescript": "^4.0.3",
-    "vsce": "^2.15.0",
-    "vscode": "^1.1.36"
-  }
 }
