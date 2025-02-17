@@ -1,5 +1,7 @@
 import * as vscode from "vscode";
 
+const outputChannel = vscode.window.createOutputChannel("TWM");
+
 async function resizeEditorGroups(centerWidth: number) {
   const sideWidth = (1 - centerWidth) / 2;
 
@@ -20,8 +22,14 @@ async function resizeEditorGroups(centerWidth: number) {
   await vscode.commands.executeCommand("vscode.setEditorLayout", layout);
 }
 
+function isFile(editor) {
+  return editor.document.uri
+    .toJSON()
+    .external?.toString()
+    .startsWith("file://");
+}
+
 export function activate(context: vscode.ExtensionContext) {
-  const outputChannel = vscode.window.createOutputChannel("TWM");
   outputChannel.appendLine("TWM is now active");
 
   let layout: {
@@ -43,9 +51,12 @@ export function activate(context: vscode.ExtensionContext) {
     resizeEditorGroups(centerWidth);
 
     const editors = vscode.window.visibleTextEditors;
-    layout.left = editors.find((e) => e.viewColumn === 1)?.document || null;
-    layout.center = editors.find((e) => e.viewColumn === 2)?.document || null;
-    layout.right = editors.find((e) => e.viewColumn === 3)?.document || null;
+    layout.left =
+      editors.find((e) => e.viewColumn === 1 && isFile(e))?.document || null;
+    layout.center =
+      editors.find((e) => e.viewColumn === 2 && isFile(e))?.document || null;
+    layout.right =
+      editors.find((e) => e.viewColumn === 3 && isFile(e))?.document || null;
 
     const nonNullEditor = layout.left || layout.center || layout.right;
     if (!layout.left) {
@@ -84,68 +95,101 @@ export function activate(context: vscode.ExtensionContext) {
   // SWAPPING
   let isSwapping = false;
   disposable = vscode.window.onDidChangeActiveTextEditor(async (editor) => {
-    if (!editor || isSwapping || !active) return;
+    try {
+      if (!editor || isSwapping || !active) return;
 
-    const editors = vscode.window.visibleTextEditors;
+      outputChannel.appendLine(
+        `Active editor: ${JSON.stringify(editor, null, 2)}\nIsFile: ${isFile(editor)}`,
+      );
+      if (!isFile(editor)) return;
 
-    isSwapping = true;
-    // we focused the left editor, swap center and left
-    if (editor.viewColumn === 1) {
+      const editors = vscode.window.visibleTextEditors;
+
       isSwapping = true;
-      const centerEditor = editors.find((e) => e.viewColumn === 2)?.document;
-      const leftEditor = editors.find((e) => e.viewColumn === 1)?.document;
+      // we focused the left editor, swap center and left
+      if (editor.viewColumn === 1) {
+        outputChannel.appendLine("Focused left");
+        isSwapping = true;
+        const centerEditor = editors.find(
+          (e) => e.viewColumn === 2 && isFile(e),
+        )?.document;
+        const leftEditor = editors.find(
+          (e) => e.viewColumn === 1 && isFile(e),
+        )?.document;
 
-      if (centerEditor && leftEditor) {
-        await vscode.window.showTextDocument(leftEditor, {
-          viewColumn: 2,
-          preserveFocus: true,
-        });
-        await vscode.window.showTextDocument(centerEditor, { viewColumn: 1 });
-        await vscode.window.showTextDocument(leftEditor, { viewColumn: 2 });
-        layout.left = centerEditor;
-        layout.center = leftEditor;
+        if (centerEditor && leftEditor) {
+          await vscode.window.showTextDocument(leftEditor, {
+            viewColumn: 2,
+            preserveFocus: true,
+          });
+          await vscode.window.showTextDocument(centerEditor, { viewColumn: 1 });
+          await vscode.window.showTextDocument(leftEditor, { viewColumn: 2 });
+          layout.left = centerEditor;
+          layout.center = leftEditor;
+        }
       }
+      // a new file has been opened, swap center and left, open new file
+      else if (editor.viewColumn === 2) {
+        outputChannel.appendLine("Focused center / open new");
+        const centerEditor = editors.find(
+          (e) => e.viewColumn === 2 && isFile(e),
+        )?.document;
+
+        // only if it's really a new file
+        if (centerEditor?.uri.toString() === layout.center?.uri.toString()) {
+          isSwapping = false;
+          return;
+        }
+        const leftEditor = editors.find(
+          (e) => e.viewColumn === 1 && isFile(e),
+        )?.document;
+
+        if (centerEditor && leftEditor) {
+          outputChannel.appendLine(
+            `OldCenter: ${JSON.stringify(layout.center, null, 2)}`,
+          );
+          outputChannel.appendLine(
+            `NewCenter: ${JSON.stringify(centerEditor, null, 2)}`,
+          );
+
+          await vscode.window.showTextDocument(layout.center!, {
+            viewColumn: 1,
+          });
+          await vscode.window.showTextDocument(centerEditor, { viewColumn: 2 });
+          layout.left = layout.center;
+          layout.center = centerEditor;
+        }
+      }
+      // we focused the right editor, swap center and right
+      else if (editor.viewColumn === 3) {
+        outputChannel.appendLine("Focused right");
+        const centerEditor = editors.find(
+          (e) => e.viewColumn === 2 && isFile(e),
+        )?.document;
+        const rightEditor = editors.find(
+          (e) => e.viewColumn === 3 && isFile(e),
+        )?.document;
+
+        if (centerEditor && rightEditor) {
+          await vscode.window.showTextDocument(rightEditor, {
+            viewColumn: 2,
+            preserveFocus: true,
+          });
+          await vscode.window.showTextDocument(centerEditor, { viewColumn: 3 });
+          await vscode.window.showTextDocument(rightEditor, { viewColumn: 2 });
+          layout.right = centerEditor;
+          layout.center = rightEditor;
+        }
+      }
+      isSwapping = false;
+
+      await init();
+    } catch (e) {
+      outputChannel.appendLine(`Error: ${e}`);
     }
-    // a new file has been opened, swap center and right, open new file
-    else if (editor.viewColumn === 2) {
-      const centerEditor = editors.find((e) => e.viewColumn === 2)?.document;
-      // only if it's really a new file
-      if (centerEditor?.uri.toString() === layout.center?.uri.toString()) {
-        isSwapping = false;
-        return;
-      }
-      const leftEditor = editors.find((e) => e.viewColumn === 1)?.document;
-
-      if (centerEditor && leftEditor) {
-        await vscode.window.showTextDocument(layout.center!, { viewColumn: 1 });
-        await vscode.window.showTextDocument(centerEditor, { viewColumn: 2 });
-        layout.left = layout.center;
-        layout.center = centerEditor;
-      }
-    }
-    // we focused the right editor, swap center and right
-    else if (editor.viewColumn === 3) {
-      const centerEditor = editors.find((e) => e.viewColumn === 2)?.document;
-      const rightEditor = editors.find((e) => e.viewColumn === 3)?.document;
-
-      if (centerEditor && rightEditor) {
-        await vscode.window.showTextDocument(rightEditor, {
-          viewColumn: 2,
-          preserveFocus: true,
-        });
-        await vscode.window.showTextDocument(centerEditor, { viewColumn: 3 });
-        await vscode.window.showTextDocument(rightEditor, { viewColumn: 2 });
-        layout.right = centerEditor;
-        layout.center = rightEditor;
-      }
-    }
-    isSwapping = false;
-
-    await init();
   });
 }
 
 export function deactivate(context: vscode.ExtensionContext) {
-  const outputChannel = vscode.window.createOutputChannel("TWM");
   outputChannel.appendLine("TWM is now inactive");
 }
