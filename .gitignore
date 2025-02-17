@@ -3,7 +3,6 @@
 **/*.log
 
 # EDITOR
-.vscode
 .VSCodeCounter
 .idea
 .nvim
