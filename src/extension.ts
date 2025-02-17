@@ -184,11 +184,12 @@ export function activate(context: vscode.ExtensionContext) {
           layout.center = rightEditor;
         }
       }
-      isSwapping = false;
 
       await init();
+      isSwapping = false;
     } catch (e) {
       outputChannel.appendLine(`Error: ${e}`);
+      isSwapping = false;
     }
   });
 }
